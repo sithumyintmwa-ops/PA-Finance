@@ -1,0 +1,8 @@
+{
+  "appId": "com.pa.finance",
+  "appName": "Personal Assistant",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}
