@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Personal Assistant</title>
+  <style>
+    :root {
+      --bg: #f4f7f6;
+      --surface: #ffffff;
+      --surface-2: #edf2f0;
+      --text: #111c18;
+      --text-muted: #64746d;
+      --border: #e2e9e6;
+      --primary: #145a41;
+      --primary-soft: #e6f2ed;
+      --income: #15803d;
+      --income-bg: #dcfce7;
+      --expense: #c2593f;
+      --expense-bg: #fcebe6;
+      --shadow: 0 4px 20px rgba(17, 28, 24, 0.06);
+      --radius: 18px;
+      --nav-height: 68px;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0c1411;
+      --surface: #14201c;
+      --surface-2: #1c2c26;
+      --text: #eef5f2;
+      --text-muted: #8ea39a;
+      --border: #24362f;
+      --primary: #2ba876;
+      --primary-soft: #17362a;
+      --income: #34d399;
+      --income-bg: #123326;
+      --expense: #f28466;
+      --expense-bg: #361e18;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Pyidaungsu", "Noto Sans Myanmar", "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: calc(var(--nav-height) + 84px);
+      line-height: 1.45;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .app-container {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Top Bar */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: var(--bg);
+      padding: 14px 18px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(10px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #145a41, #0c3b2a);
+      color: #fff;
+      font-weight: 800;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      letter-spacing: 0.5px;
+      box-shadow: 0 3px 10px rgba(20, 90, 65, 0.25);
+    }
+
+    .brand-title {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.12s, background 0.15s;
+    }
+
+    .icon-btn:active {
+      transform: scale(0.94);
+    }
+
+    .icon-btn.ai-btn {
+      width: auto;
+      padding: 0 11px;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary);
+      background: var(--primary-soft);
+      border-color: transparent;
+    }
+
+    /* Main Content */
+    .section {
+      display: none;
+      padding: 6px 18px 20px;
+      animation: fadeIn 0.18s ease;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Unified Balance Card */
+    .hero-card {
+      background: linear-gradient(145deg, #145a41, #0f4431);
+      color: #ffffff;
+      border-radius: 22px;
+      padding: 20px;
+      box-shadow: 0 10px 26px rgba(20, 90, 65, 0.22);
+      margin-bottom: 16px;
+    }
+
+    .hero-label {
+      font-size: 12px;
+      opacity: 0.82;
+      margin-bottom: 4px;
+    }
+
+    .hero-balance {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 16px;
+    }
+
+    .hero-balance span {
+      font-size: 14px;
+      font-weight: 500;
+      opacity: 0.85;
+      margin-left: 4px;
+    }
+
+    .hero-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .hero-mini {
+      background: rgba(255, 255, 255, 0.11);
+      border-radius: 14px;
+      padding: 11px 13px;
+      backdrop-filter: blur(6px);
+    }
+
+    .hero-mini-label {
+      font-size: 11px;
+      opacity: 0.85;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 4px;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .dot.in { background: #6ee7b7; }
+    .dot.out { background: #fca5a5; }
+
+    .hero-mini-val {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    /* Search & Filter */
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+    }
+
+    .search-box input {
+      border: none;
+      outline: none;
+      background: transparent;
+      color: var(--text);
+      font-size: 14px;
+      width: 100%;
+      font-family: inherit;
+    }
+
+    .chips {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .chip {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      font-family: inherit;
+    }
+
+    .chip.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    /* Transaction List */
+    .date-header {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin: 14px 0 8px;
+    }
+
+    .tx-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 13px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 9px;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    .tx-card:active {
+      transform: scale(0.985);
+    }
+
+    .tx-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .tx-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .tx-icon.income {
+      background: var(--income-bg);
+      color: var(--income);
+    }
+
+    .tx-icon.expense {
+      background: var(--expense-bg);
+      color: var(--expense);
+    }
+
+    .tx-info {
+      min-width: 0;
+    }
+
+    .tx-title {
+      font-size: 14px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tx-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tx-right {
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .tx-amount {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .tx-amount.income { color: var(--income); }
+    .tx-amount.expense { color: var(--expense); }
+
+    .tx-unit {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Cards for Analytics, Banks, Savings, Todos */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    /* Donut Chart */
+    .donut-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 8px 0 20px;
+      position: relative;
+    }
+
+    .donut-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .donut-center-label {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .donut-center-val {
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .cat-row {
+      margin-bottom: 13px;
+    }
+
+    .cat-row-top {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 5px;
+    }
+
+    .cat-name { font-weight: 600; }
+    .cat-val { font-weight: 700; color: var(--text-muted); }
+
+    .bar-track {
+      height: 8px;
+      background: var(--surface-2);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 99px;
+    }
+
+    /* Bank Card */
+    .bank-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 15px 16px;
+      margin-bottom: 10px;
+    }
+
+    .bank-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .bank-name {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .bank-net {
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .bank-stats {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+      padding-top: 8px;
+      border-top: 1px dashed var(--border);
+    }
+
+    /* Savings & Todo */
+    .inline-form {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 11px 13px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+    }
+
+    .input-field:focus {
+      border-color: var(--primary);
+      background: var(--surface);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 11px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      width: 100%;
+    }
+
+    .todo-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      margin-bottom: 8px;
+    }
+
+    .todo-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .todo-check {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      border: 2px solid var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    .todo-item.done .todo-check {
+      background: var(--primary);
+    }
+
+    .todo-item.done .todo-text {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    /* FAB */
+    .fab {
+      position: fixed;
+      right: max(18px, calc(50% - 222px));
+      bottom: calc(var(--nav-height) + 16px);
+      width: 56px;
+      height: 56px;
+      border-radius: 18px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      box-shadow: 0 8px 22px rgba(20, 90, 65, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      cursor: pointer;
+      z-index: 40;
+      transition: transform 0.15s;
+    }
+
+    .fab:active {
+      transform: scale(0.92);
+    }
+
+    /* Bottom Nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      height: var(--nav-height);
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      padding: 6px 6px env(safe-area-inset-bottom, 6px);
+      z-index: 35;
+    }
+
+    .nav-item {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      font-size: 10.5px;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .nav-item.active {
+      color: var(--primary);
+      background: var(--primary-soft);
+    }
+
+    /* Modal / Bottom Sheet */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.48);
+      z-index: 60;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .sheet {
+      width: 100%;
+      max-width: 480px;
+      max-height: 92vh;
+      overflow-y: auto;
+      background: var(--surface);
+      border-radius: 24px 24px 0 0;
+      padding: 18px 18px 28px;
+      animation: slideUp 0.2s ease;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(40px); opacity: 0.7; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .sheet-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .sheet-title {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .seg-control {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--surface-2);
+      padding: 4px;
+      border-radius: 14px;
+      margin-bottom: 14px;
+    }
+
+    .seg-btn {
+      border: none;
+      padding: 10px;
+      border-radius: 11px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+    }
+
+    .seg-btn.active.in {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .seg-btn.active.out {
+      background: var(--expense);
+      color: #fff;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+    }
+
+    .amount-input {
+      font-size: 26px;
+      font-weight: 800;
+      padding: 12px 14px;
+    }
+
+    .scan-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 11px;
+      border-radius: 12px;
+      border: 1.5px dashed var(--primary);
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-bottom: 14px;
+      font-family: inherit;
+    }
+
+    .scan-btn:disabled {
+      opacity: 0.65;
+      cursor: wait;
+    }
+
+    .api-box {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      margin-top: 14px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 36px 16px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #111c18;
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 100;
+      display: none;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+      max-width: 90vw;
+      text-align: center;
+    }
+
+    .toast.show { display: block; }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Bar -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">PA</div>
+        <div class="brand-title">Personal Assistant</div>
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn ai-btn" onclick="openAIModal()" title="AI & API Key">✦ AI</button>
+        <button class="icon-btn" onclick="openBackupModal()" title="Backup / Restore">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+        </button>
+        <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" title="Dark Mode">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Tab 1: စာရင်း (Ledger) -->
+    <main id="tab-ledger" class="section active">
+      <div class="hero-card">
+        <div class="hero-label">လက်ကျန်ငွေ စုစုပေါင်း (MMK)</div>
+        <div class="hero-balance" id="netBalance">0 <span>ကျပ်</span></div>
+        <div class="hero-split">
+          <div class="hero-mini">
+            <div class="hero-mini-label"><span class="dot in"></span>ဝင်ငွေ စုစုပေါင်း</div>
+            <div class="hero-mini-val" id="totalIncome">0</div>
+          </div>
+          <div class="hero-mini">
+            <div class="hero-mini-label"><span class="dot out"></span>ထွက်ငွေ စုစုပေါင်း</div>
+            <div class="hero-mini-val" id="totalExpense">0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="search-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="searchInput" placeholder="စာရင်းရှာရန် (အမည်၊ ဘဏ်၊ အမျိုးအစား)..." oninput="renderLedger()" />
+      </div>
+
+      <div class="chips">
+        <button class="chip active" onclick="setFilter('all', this)">အားလုံး</button>
+        <button class="chip" onclick="setFilter('income', this)">အဝင်</button>
+        <button class="chip" onclick="setFilter('expense', this)">အထွက်</button>
+      </div>
+
+      <div class="meta-row">
+        <span id="recordCount">မှတ်တမ်း: 0 ခု · ကျပ် (MMK)</span>
+      </div>
+
+      <div id="txList"></div>
+    </main>
+
+    <!-- Tab 2: စုငွေ (Savings) -->
+    <section id="tab-savings" class="section">
+      <div class="card">
+        <div class="card-title">စုငွေ ရည်မှန်းချက်များ</div>
+        <div class="inline-form">
+          <input type="text" id="savName" class="input-field" placeholder="စုငွေအမည် (ဥပမာ - ခရီးစရိတ်)" />
+          <input type="number" id="savAmount" class="input-field" placeholder="ပမာဏ" style="max-width:120px" />
+          <button class="btn-primary" onclick="addSaving()">ထည့်</button>
+        </div>
+        <div id="savingsList"></div>
+      </div>
+    </section>
+
+    <!-- Tab 3: လုပ်စရာ (To-Do) -->
+    <section id="tab-todo" class="section">
+      <div class="card">
+        <div class="card-title">လုပ်စရာ စာရင်း</div>
+        <div class="inline-form">
+          <input type="text" id="todoInput" class="input-field" placeholder="လုပ်စရာအသစ် ရိုက်ထည့်ပါ..." />
+          <button class="btn-primary" onclick="addTodo()">ထည့်</button>
+        </div>
+        <div id="todoList"></div>
+      </div>
+    </section>
+
+    <!-- Tab 4: သုံးသပ်ချက် (Analytics) -->
+    <section id="tab-analytics" class="section">
+      <div class="card">
+        <div class="card-title">အမျိုးအစားအလိုက် အသုံးစရိတ်</div>
+        <div class="donut-wrap">
+          <svg width="190" height="190" viewBox="0 0 190 190" id="donutSvg"></svg>
+          <div class="donut-center">
+            <div class="donut-center-label">အထွက်စုစုပေါင်း</div>
+            <div class="donut-center-val" id="donutTotal">0</div>
+          </div>
+        </div>
+        <div id="categoryBars"></div>
+      </div>
+    </section>
+
+    <!-- Tab 5: ဘဏ်များ (Banks) -->
+    <section id="tab-banks" class="section">
+      <div class="card-title" style="margin: 6px 0 12px;">ဘဏ် / ငွေလွှဲနည်းလမ်းအလိုက်</div>
+      <div id="banksList"></div>
+    </section>
+
+    <!-- Floating Add Button -->
+    <button class="fab" onclick="openAddModal()" aria-label="စာရင်းအသစ်ထည့်">+</button>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" onclick="switchTab('ledger', this)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span>စာရင်း</span>
+      </button>
+      <button class="nav-item" onclick="switchTab('savings', this)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        <span>စုငွေ</span>
+      </button>
+      <button class="nav-item" onclick="switchTab('todo', this)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span>လုပ်စရာ</span>
+      </button>
+      <button class="nav-item" onclick="switchTab('analytics', this)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+        <span>သုံးသပ်ချက်</span>
+      </button>
+      <button class="nav-item" onclick="switchTab('banks', this)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg>
+        <span>ဘဏ်များ</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Hidden File Input for Receipt Scan -->
+  <input type="file" id="receiptFileInput" accept="image/*" style="display:none" onchange="handleReceiptImage(event)" />
+
+  <!-- Add Transaction Modal -->
+  <div class="modal-backdrop" id="addModal" onclick="if(event.target===this) closeModal('addModal')">
+    <div class="sheet">
+      <div class="sheet-head">
+        <div class="sheet-title" id="modalTitle">ငွေလွှဲအထွက် အသစ်</div>
+        <button class="icon-btn" onclick="closeModal('addModal')">✕</button>
+      </div>
+
+      <div class="seg-control">
+        <button class="seg-btn" id="segIn" onclick="setTxType('income')">အဝင်</button>
+        <button class="seg-btn active out" id="segOut" onclick="setTxType('expense')">အထွက်</button>
+      </div>
+
+      <button class="scan-btn" id="scanBtn" onclick="triggerReceiptScan()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg>
+        <span id="scanBtnText">ပုံမှ စကန်ဖတ်မယ် (Gemini AI)</span>
+      </button>
+
+      <div class="form-group">
+        <label class="form-label">ငွေပမာဏ (ကျပ်)</label>
+        <input type="number" id="txAmount" class="input-field amount-input" placeholder="0" inputmode="numeric" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">အမည်</label>
+        <input type="text" id="txName" class="input-field" placeholder="အမည် ရိုက်ပါ (ဥပမာ - အထွေထွေ)" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">ဘဏ် / ငွေလွှဲနည်းလမ်း</label>
+        <select id="txBank" class="input-field">
+          <option value="KBZPay">KBZPay</option>
+          <option value="UAB Bank">UAB Bank</option>
+          <option value="Yoma Bank">Yoma Bank</option>
+          <option value="KBZ Bank">KBZ Bank</option>
+          <option value="WavePay">WavePay</option>
+          <option value="ငွေသား (Cash)">ငွေသား (Cash)</option>
+        </select>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div class="form-group">
+          <label class="form-label">ရက်စွဲ</label>
+          <input type="date" id="txDate" class="input-field" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">အမျိုးအစား (Category)</label>
+          <select id="txCategory" class="input-field">
+            <option value="စီးပွားရေး">စီးပွားရေး</option>
+            <option value="စားသောက်">စားသောက်</option>
+            <option value="စားဆီ">စားဆီ</option>
+            <option value="အတိုးပေး">အတိုးပေး</option>
+            <option value="လစာ/ဝင်ငွေ">လစာ/ဝင်ငွေ</option>
+            <option value="အထွေထွေ">အထွေထွေ</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">အကြောင်းအရာ / မှတ်ချက်</label>
+        <input type="text" id="txNote" class="input-field" placeholder="လိုအပ်မှ ထည့်ပါ (ဥပမာ - မနက်စာ)" />
+      </div>
+
+      <button class="btn-primary" style="width:100%; padding:14px; font-size:15px;" onclick="saveTransaction()">သိမ်းမယ်</button>
+    </div>
+  </div>
+
+  <!-- Detail Modal -->
+  <div class="modal-backdrop" id="detailModal" onclick="if(event.target===this) closeModal('detailModal')">
+    <div class="sheet">
+      <div class="sheet-head">
+        <div class="sheet-title">စာရင်း အသေးစိတ်</div>
+        <button class="icon-btn" onclick="closeModal('detailModal')">✕</button>
+      </div>
+      <div id="detailBody" style="margin-bottom:16px; font-size:14px; line-height:1.8;"></div>
+      <button class="btn-outline" style="color:var(--expense); border-color:var(--expense);" id="deleteTxBtn">ဒီစာရင်းကို ဖျက်မယ်</button>
+    </div>
+  </div>
+
+  <!-- Backup Modal -->
+  <div class="modal-backdrop" id="backupModal" onclick="if(event.target===this) closeModal('backupModal')">
+    <div class="sheet">
+      <div class="sheet-head">
+        <div class="sheet-title">အရန်သိမ်းဆည်းခြင်း (Backup)</div>
+        <button class="icon-btn" onclick="closeModal('backupModal')">✕</button>
+      </div>
+      <p style="font-size:13px; color:var(--text-muted); margin-bottom:14px;">
+        စာရင်းအားလုံးကို ဖုန်းထဲမှာ JSON ဖိုင်အဖြစ် အရန်သိမ်းနိုင်သလို ပြန်လည်ထည့်သွင်း (Restore) နိုင်ပါတယ်။
+      </p>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button class="btn-primary" onclick="exportData()">Backup ဖိုင် Download ဆွဲမယ် (.json)</button>
+        <label class="btn-outline" style="text-align:center; cursor:pointer;">
+          Backup ဖိုင် ပြန်ထည့်မယ် (Restore)
+          <input type="file" accept=".json" style="display:none" onchange="importData(event)" />
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Summary & Gemini API Key Modal -->
+  <div class="modal-backdrop" id="aiModal" onclick="if(event.target===this) closeModal('aiModal')">
+    <div class="sheet">
+      <div class="sheet-head">
+        <div class="sheet-title">✦ AI အနှစ်ချုပ် နှင့် ဆက်တင်</div>
+        <button class="icon-btn" onclick="closeModal('aiModal')">✕</button>
+      </div>
+      <div id="aiBody" style="font-size:14px; line-height:1.7;"></div>
+
+      <div class="api-box">
+        <label class="form-label" style="color:var(--text); font-size:13px;">Gemini API Key (ပုံမှ စကန်ဖတ်ရန်)</label>
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">
+          aistudio.google.com/apikey မှ အခမဲ့ရယူထားသော Key ကို ထည့်သိမ်းပါ။ ဖုန်းထဲတွင်သာ သိမ်းဆည်းပါမည်။
+        </p>
+        <div style="display:flex; gap:8px;">
+          <input type="password" id="geminiKeyInput" class="input-field" placeholder="AIzaSy..." />
+          <button class="btn-primary" onclick="saveGeminiKey()">သိမ်း</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const COLORS = ['#c2593f', '#145a41', '#d4a24c', '#5b7c99', '#8b5cf6', '#ec4899'];
+
+    const defaultData = {
+      transactions: [
+        { id: 1, type: 'expense', amount: 26300, name: 'အထွေထွေ', bank: 'KBZPay', date: '2026-11-19', category: 'စားသောက်', note: 'မနက်စာ' },
+        { id: 2, type: 'income', amount: 7695400, name: 'ဆိုင်ရောင်းရငွေ', bank: 'KBZPay', date: '2026-11-18', category: 'လစာ/ဝင်ငွေ', note: 'အပတ်စဉ် ဝင်ငွေ' },
+        { id: 3, type: 'expense', amount: 28000000, name: 'ကုန်ပစ္စည်းဝယ်ယူမှု', bank: 'UAB Bank', date: '2026-11-17', category: 'စီးပွားရေး', note: 'လက္ကားမှာယူမှု' },
+        { id: 4, type: 'expense', amount: 5794300, name: 'ဆိုင်အသုံးစရိတ်', bank: 'Yoma Bank', date: '2026-11-16', category: 'စီးပွားရေး', note: 'ဝန်ထမ်းနှင့် လုပ်ငန်းသုံး' },
+        { id: 5, type: 'expense', amount: 2918220, name: 'စားဆီဝယ်ယူမှု', bank: 'KBZPay', date: '2026-11-15', category: 'စားဆီ', note: 'မီးဖိုချောင်သုံး' },
+        { id: 6, type: 'expense', amount: 900000, name: 'အတိုးပေး', bank: 'KBZPay', date: '2026-11-14', category: 'အတိုးပေး', note: 'လစဉ်အတိုး' }
+      ],
+      savings: [
+        { id: 1, name: 'အရေးပေါ်ရန်ပုံငွေ', amount: 2500000 },
+        { id: 2, name: 'ဆိုင်ပြုပြင်ရန် စုငွေ', amount: 1800000 }
+      ],
+      todos: [
+        { id: 1, text: 'KBZPay လချုပ်စာရင်း စစ်ရန်', done: false },
+        { id: 2, text: 'စားဆီပေးသွင်းသူထံ ငွေရှင်းရန်', done: true }
+      ]
+    };
+
+    let state = JSON.parse(localStorage.getItem('pa_finance_state_v1') || 'null') || defaultData;
+    let currentFilter = 'all';
+    let currentTxType = 'expense';
+
+    function saveState() {
+      localStorage.setItem('pa_finance_state_v1', JSON.stringify(state));
+    }
+
+    function fmt(n) {
+      return Number(n || 0).toLocaleString('en-US');
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2600);
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      localStorage.setItem('pa_theme', isDark ? 'light' : 'dark');
+    }
+
+    if (localStorage.getItem('pa_theme') === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+
+    function switchTab(name, btn) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById('tab-' + name).classList.add('active');
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderAll();
+    }
+
+    function setFilter(f, btn) {
+      currentFilter = f;
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      renderLedger();
+    }
+
+    function renderLedger() {
+      const q = (document.getElementById('searchInput').value || '').toLowerCase();
+      let inc = 0, exp = 0;
+      state.transactions.forEach(t => {
+        if (t.type === 'income') inc += Number(t.amount);
+        else exp += Number(t.amount);
+      });
+      const net = inc - exp;
+      document.getElementById('netBalance').innerHTML = `${net < 0 ? '-' : ''}${fmt(Math.abs(net))} <span>ကျပ်</span>`;
+      document.getElementById('totalIncome').textContent = fmt(inc);
+      document.getElementById('totalExpense').textContent = fmt(exp);
+
+      const filtered = state.transactions
+        .filter(t => currentFilter === 'all' || t.type === currentFilter)
+        .filter(t => !q || `${t.name} ${t.bank} ${t.category} ${t.note}`.toLowerCase().includes(q))
+        .sort((a, b) => (b.date || '').localeCompare(a.date || '') || b.id - a.id);
+
+      document.getElementById('recordCount').textContent = `မှတ်တမ်း: ${filtered.length} ခု · ကျပ် (MMK)`;
+
+      const list = document.getElementById('txList');
+      if (!filtered.length) {
+        list.innerHTML = '<div class="empty-state">စာရင်းမှတ်တမ်း မရှိသေးပါ</div>';
+        return;
+      }
+
+      const grouped = {};
+      filtered.forEach(t => {
+        const d = t.date || 'ရက်စွဲမရှိ';
+        if (!grouped[d]) grouped[d] = [];
+        grouped[d].push(t);
+      });
+
+      list.innerHTML = Object.keys(grouped).map(date => `
+        <div class="date-header">${date}</div>
+        ${grouped[date].map(t => `
+          <div class="tx-card" onclick="openDetail(${t.id})">
+            <div class="tx-left">
+              <div class="tx-icon ${t.type}">${t.type === 'income' ? '↙' : '↗'}</div>
+              <div class="tx-info">
+                <div class="tx-title">${t.name}</div>
+                <div class="tx-sub">${t.category} · ${t.bank}${t.note ? ' · ' + t.note : ''}</div>
+              </div>
+            </div>
+            <div class="tx-right">
+              <div class="tx-amount ${t.type}">${t.type === 'income' ? '+' : '-'} ${fmt(t.amount)}</div>
+              <div class="tx-unit">${t.type === 'income' ? 'အဝင်' : 'အထွက်'} · ကျပ်</div>
+            </div>
+          </div>
+        `).join('')}
+      `).join('');
+    }
+
+    function renderAnalytics() {
+      const expenses = state.transactions.filter(t => t.type === 'expense');
+      const total = expenses.reduce((s, t) => s + Number(t.amount), 0);
+      document.getElementById('donutTotal').textContent = fmt(total) + ' ကျပ်';
+
+      const byCat = {};
+      expenses.forEach(t => {
+        byCat[t.category] = (byCat[t.category] || 0) + Number(t.amount);
+      });
+      const entries = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
+
+      const svg = document.getElementById('donutSvg');
+      const r = 72, c = 2 * Math.PI * r;
+      let offset = 0;
+
+      if (!entries.length) {
+        svg.innerHTML = `<circle cx="95" cy="95" r="${r}" fill="none" stroke="var(--surface-2)" stroke-width="22"/>`;
+        document.getElementById('categoryBars').innerHTML = '<div class="empty-state">အသုံးစရိတ် မရှိသေးပါ</div>';
+        return;
+      }
+
+      svg.innerHTML = entries.map(([cat, val], idx) => {
+        const pct = val / total;
+        const dash = pct * c;
+        const color = COLORS[idx % COLORS.length];
+        const seg = `<circle cx="95" cy="95" r="${r}" fill="none" stroke="${color}" stroke-width="22" stroke-dasharray="${dash} ${c - dash}" stroke-dashoffset="${-offset}" transform="rotate(-90 95 95)"/>`;
+        offset += dash;
+        return seg;
+      }).join('');
+
+      document.getElementById('categoryBars').innerHTML = entries.map(([cat, val], idx) => {
+        const pct = ((val / total) * 100).toFixed(1);
+        const color = COLORS[idx % COLORS.length];
+        return `
+          <div class="cat-row">
+            <div class="cat-row-top">
+              <span class="cat-name">${cat}</span>
+              <span class="cat-val">${fmt(val)} · ${pct}%</span>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:${pct}%; background:${color};"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderBanks() {
+      const banks = {};
+      state.transactions.forEach(t => {
+        if (!banks[t.bank]) banks[t.bank] = { in: 0, out: 0 };
+        if (t.type === 'income') banks[t.bank].in += Number(t.amount);
+        else banks[t.bank].out += Number(t.amount);
+      });
+
+      const list = document.getElementById('banksList');
+      const entries = Object.entries(banks);
+      if (!entries.length) {
+        list.innerHTML = '<div class="empty-state">ဘဏ်စာရင်း မရှိသေးပါ</div>';
+        return;
+      }
+
+      list.innerHTML = entries.map(([bank, v]) => {
+        const net = v.in - v.out;
+        return `
+          <div class="bank-card">
+            <div class="bank-head">
+              <div class="bank-name">🏦 ${bank}</div>
+              <div class="bank-net" style="color:${net >= 0 ? 'var(--income)' : 'var(--expense)'}">
+                ${net >= 0 ? '+' : '-'}${fmt(Math.abs(net))} MMK
+              </div>
+            </div>
+            <div class="bank-stats">
+              <span>အဝင်: <strong style="color:var(--income)">${fmt(v.in)}</strong></span>
+              <span>အထွက်: <strong style="color:var(--expense)">${fmt(v.out)}</strong></span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderSavings() {
+      const el = document.getElementById('savingsList');
+      if (!state.savings.length) {
+        el.innerHTML = '<div class="empty-state">စုငွေ မရှိသေးပါ</div>';
+        return;
+      }
+      el.innerHTML = state.savings.map(s => `
+        <div class="tx-card">
+          <div class="tx-info">
+            <div class="tx-title">${s.name}</div>
+            <div class="tx-sub">စုဆောင်းထားငွေ</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <strong style="color:var(--income)">${fmt(s.amount)} ကျပ်</strong>
+            <button class="icon-btn" style="width:30px;height:30px;" onclick="deleteSaving(${s.id})">✕</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function addSaving() {
+      const name = document.getElementById('savName').value.trim();
+      const amount = Number(document.getElementById('savAmount').value);
+      if (!name || !amount) return showToast('အမည်နှင့် ပမာဏ ထည့်ပါ');
+      state.savings.unshift({ id: Date.now(), name, amount });
+      document.getElementById('savName').value = '';
+      document.getElementById('savAmount').value = '';
+      saveState();
+      renderSavings();
+      showToast('စုငွေ ထည့်ပြီးပါပြီ');
+    }
+
+    function deleteSaving(id) {
+      state.savings = state.savings.filter(s => s.id !== id);
+      saveState();
+      renderSavings();
+    }
+
+    function renderTodos() {
+      const el = document.getElementById('todoList');
+      if (!state.todos.length) {
+        el.innerHTML = '<div class="empty-state">လုပ်စရာ မရှိသေးပါ</div>';
+        return;
+      }
+      el.innerHTML = state.todos.map(t => `
+        <div class="todo-item ${t.done ? 'done' : ''}">
+          <div class="todo-left" onclick="toggleTodo(${t.id})">
+            <div class="todo-check">${t.done ? '✓' : ''}</div>
+            <div class="todo-text">${t.text}</div>
+          </div>
+          <button class="icon-btn" style="width:30px;height:30px;" onclick="deleteTodo(${t.id})">✕</button>
+        </div>
+      `).join('');
+    }
+
+    function addTodo() {
+      const text = document.getElementById('todoInput').value.trim();
+      if (!text) return;
+      state.todos.unshift({ id: Date.now(), text, done: false });
+      document.getElementById('todoInput').value = '';
+      saveState();
+      renderTodos();
+    }
+
+    function toggleTodo(id) {
+      const t = state.todos.find(x => x.id === id);
+      if (t) t.done = !t.done;
+      saveState();
+      renderTodos();
+    }
+
+    function deleteTodo(id) {
+      state.todos = state.todos.filter(x => x.id !== id);
+      saveState();
+      renderTodos();
+    }
+
+    function openAddModal() {
+      document.getElementById('txAmount').value = '';
+      document.getElementById('txName').value = '';
+      document.getElementById('txNote').value = '';
+      document.getElementById('txDate').value = new Date().toISOString().slice(0, 10);
+      setTxType('expense');
+      document.getElementById('addModal').classList.add('open');
+    }
+
+    function setTxType(type) {
+      currentTxType = type;
+      document.getElementById('modalTitle').textContent = type === 'income' ? 'ငွေလွှဲအဝင် အသစ်' : 'ငွေလွှဲအထွက် အသစ်';
+      const sIn = document.getElementById('segIn');
+      const sOut = document.getElementById('segOut');
+      sIn.className = 'seg-btn' + (type === 'income' ? ' active in' : '');
+      sOut.className = 'seg-btn' + (type === 'expense' ? ' active out' : '');
+    }
+
+    /* ===== Gemini AI Vision Receipt Scanner ===== */
+    function saveGeminiKey() {
+      const key = document.getElementById('geminiKeyInput').value.trim();
+      if (!key) return showToast('API Key ထည့်ပါ');
+      localStorage.setItem('pa_gemini_api_key', key);
+      showToast('Gemini API Key သိမ်းပြီးပါပြီ');
+    }
+
+    function triggerReceiptScan() {
+      const apiKey = localStorage.getItem('pa_gemini_api_key');
+      if (!apiKey) {
+        closeModal('addModal');
+        openAIModal();
+        showToast('အရင်ဆုံး Gemini API Key ထည့်သိမ်းပေးပါ');
+        return;
+      }
+      const input = document.getElementById('receiptFileInput');
+      input.value = '';
+      input.click();
+    }
+
+    function compressImageToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = e => {
+          const img = new Image();
+          img.onerror = reject;
+          img.onload = () => {
+            const maxDim = 1200;
+            let w = img.width, h = img.height;
+            if (w > maxDim || h > maxDim) {
+              if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+              else { w = Math.round(w * maxDim / h); h = maxDim; }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+            resolve(dataUrl.split(',')[1]);
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function handleReceiptImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const apiKey = localStorage.getItem('pa_gemini_api_key');
+      if (!apiKey) return showToast('Gemini API Key မရှိသေးပါ');
+
+      const btn = document.getElementById('scanBtn');
+      const btnText = document.getElementById('scanBtnText');
+      btn.disabled = true;
+      btnText.textContent = 'Gemini AI ဖြင့် ဖတ်နေပါသည်...';
+
+      try {
+        const base64Data = await compressImageToBase64(file);
+        const prompt = `Extract transaction details from this Myanmar payment receipt or bank transfer screenshot.
+Return ONLY valid JSON with these exact keys:
+{
+  "type": "income" or "expense",
+  "amount": integer number without commas or currency symbols,
+  "name": "recipient or sender name or merchant name",
+  "bank": one of ["KBZPay", "UAB Bank", "Yoma Bank", "KBZ Bank", "WavePay", "ငွေသား (Cash)"],
+  "date": "YYYY-MM-DD" (if missing use today),
+  "category": one of ["စီးပွားရေး", "စားသောက်", "စားဆီ", "အတိုးပေး", "လစာ/ဝင်ငွေ", "အထွေထွေ"],
+  "note": "short remark or transaction number"
+}`;
+
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              parts: [
+                { text: prompt },
+                { inline_data: { mime_type: 'image/jpeg', data: base64Data } }
+              ]
+            }],
+            generationConfig: { responseMimeType: 'application/json' }
+          })
+        });
+
+        const json = await res.json();
+        if (!res.ok) {
+          throw new Error(json?.error?.message || 'API ချိတ်ဆက်မှု မအောင်မြင်ပါ');
+        }
+
+        const rawText = json.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        const cleaned = rawText.replace(/```json|```/g, '').trim();
+        const data = JSON.parse(cleaned);
+
+        if (data.type === 'income' || data.type === 'expense') setTxType(data.type);
+        if (data.amount) document.getElementById('txAmount').value = Math.round(Number(data.amount));
+        if (data.name) document.getElementById('txName').value = data.name;
+        if (data.date && /^\d{4}-\d{2}-\d{2}$/.test(data.date)) document.getElementById('txDate').value = data.date;
+        if (data.note) document.getElementById('txNote').value = data.note;
+
+        const bankSel = document.getElementById('txBank');
+        if (data.bank && Array.from(bankSel.options).some(o => o.value === data.bank)) {
+          bankSel.value = data.bank;
+        }
+        const catSel = document.getElementById('txCategory');
+        if (data.category && Array.from(catSel.options).some(o => o.value === data.category)) {
+          catSel.value = data.category;
+        }
+
+        showToast('ပြေစာအချက်အလက် ဖတ်ပြီးပါပြီ');
+      } catch (err) {
+        showToast('ဖတ်မရပါ: ' + (err.message || 'အင်တာနက်နှင့် API Key စစ်ပါ'));
+      } finally {
+        btn.disabled = false;
+        btnText.textContent = 'ပုံမှ စကန်ဖတ်မယ် (Gemini AI)';
+      }
+    }
+
+    function saveTransaction() {
+      const amount = Number(document.getElementById('txAmount').value);
+      const name = document.getElementById('txName').value.trim() || 'အထွေထွေ';
+      const bank = document.getElementById('txBank').value;
+      const date = document.getElementById('txDate').value || new Date().toISOString().slice(0, 10);
+      const category = document.getElementById('txCategory').value;
+      const note = document.getElementById('txNote').value.trim();
+
+      if (!amount || amount <= 0) return showToast('ငွေပမာဏ မှန်ကန်စွာ ထည့်ပါ');
+
+      state.transactions.unshift({
+        id: Date.now(),
+        type: currentTxType,
+        amount, name, bank, date, category, note
+      });
+      saveState();
+      closeModal('addModal');
+      renderAll();
+      showToast('စာရင်း သိမ်းဆည်းပြီးပါပြီ');
+    }
+
+    function openDetail(id) {
+      const t = state.transactions.find(x => x.id === id);
+      if (!t) return;
+      document.getElementById('detailBody').innerHTML = `
+        <div><strong>အမည်:</strong> ${t.name}</div>
+        <div><strong>အမျိုးအစား:</strong> ${t.type === 'income' ? 'အဝင်' : 'အထွက်'} (${t.category})</div>
+        <div><strong>ပမာဏ:</strong> ${fmt(t.amount)} ကျပ်</div>
+        <div><strong>ဘဏ် / နည်းလမ်း:</strong> ${t.bank}</div>
+        <div><strong>ရက်စွဲ:</strong> ${t.date}</div>
+        <div><strong>မှတ်ချက်:</strong> ${t.note || '-'}</div>
+      `;
+      document.getElementById('deleteTxBtn').onclick = () => {
+        state.transactions = state.transactions.filter(x => x.id !== id);
+        saveState();
+        closeModal('detailModal');
+        renderAll();
+        showToast('စာရင်း ဖျက်ပြီးပါပြီ');
+      };
+      document.getElementById('detailModal').classList.add('open');
+    }
+
+    function openBackupModal() {
+      document.getElementById('backupModal').classList.add('open');
+    }
+
+    function exportData() {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `PA-Backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Backup ဖိုင် သိမ်းဆည်းပြီးပါပြီ');
+    }
+
+    function importData(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        try {
+          const parsed = JSON.parse(ev.target.result);
+          if (parsed.transactions) {
+            state = parsed;
+            saveState();
+            renderAll();
+            closeModal('backupModal');
+            showToast('Backup ပြန်လည်ထည့်သွင်းပြီးပါပြီ');
+          }
+        } catch {
+          showToast('ဖိုင်ပုံစံ မမှန်ကန်ပါ');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function openAIModal() {
+      const inc = state.transactions.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
+      const exp = state.transactions.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
+      const byCat = {};
+      state.transactions.filter(t => t.type === 'expense').forEach(t => byCat[t.category] = (byCat[t.category] || 0) + Number(t.amount));
+      const top = Object.entries(byCat).sort((a, b) => b[1] - a[1])[0];
+
+      document.getElementById('aiBody').innerHTML = `
+        <p style="margin-bottom:10px;">လက်ရှိ မှတ်တမ်း <strong>${state.transactions.length} ခု</strong> အရ ငွေကြေးအခြေအနေ အနှစ်ချုပ်မှာ-</p>
+        <ul style="padding-left:18px; margin-bottom:10px;">
+          <li>စုစုပေါင်း ဝင်ငွေ: <strong>${fmt(inc)} ကျပ်</strong></li>
+          <li>စုစုပေါင်း ထွက်ငွေ: <strong>${fmt(exp)} ကျပ်</strong></li>
+          <li>အများဆုံး သုံးစွဲထားသည့် အမျိုးအစား: <strong>${top ? top[0] + ' (' + fmt(top[1]) + ' ကျပ်)' : '-'}</strong></li>
+        </ul>
+      `;
+      document.getElementById('geminiKeyInput').value = localStorage.getItem('pa_gemini_api_key') || '';
+      document.getElementById('aiModal').classList.add('open');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+    }
+
+    function renderAll() {
+      renderLedger();
+      renderAnalytics();
+      renderBanks();
+      renderSavings();
+      renderTodos();
+    }
+
+    renderAll();
+  </script>
+</body>
+</html>
